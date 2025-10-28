@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline Class Registration - CoreFit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #facc15;
+    }
+    form {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+    }
+    input, select, button {
+      width: 90%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+    }
+    button {
+      background: #facc15;
+      color: black;
+      cursor: pointer;
+    }
+    #payment-section {
+      margin-top: 20px;
+      display: none;
+    }
+    #qr {
+      margin-top: 15px;
+    }
+    .amount {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #22c55e;
+    }
+  </style>
+</head>
+<body>
+<a href="home.html" class="return-link">⬅ Back to Homepage</a>
+
+  <h1>🏋️ Offline Class Registration</h1>
+  <form id="offlineForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+
+    <label for="date">Preferred Date:</label>
+    <input type="date" id="date" required>
+
+    <input type="text" id="timing" placeholder="Preferred Timing (e.g., 6PM - 7PM)" required>
+
+    <label for="location">Select Branch:</label>
+    <select id="location" required>
+      <option value="">--Choose Location--</option>
+      <option value="Home">Home</option>
+      <option value="Bootcamps">Bootcamps</option>
+      <option value="Outdoors">Outdoors</option>
+    </select>
+
+    <label for="plan">Select Plan:</label>
+    <select id="plan" required>
+      <option value="">--Choose a Plan--</option>
+      <option value="Basic:799">Basic - ₹799</option>
+      <option value="Standard:1499">Standard - ₹1499</option>
+      <option value="Premium:2499">Premium - ₹2499</option>
+    </select>
+
+    <button type="submit">Register & Pay</button>
+  </form>
+
+  <div id="payment-section">
+    <p>You have selected the <span id="selectedPlan"></span> plan.</p>
+    <p class="amount">Please pay: ₹<span id="price"></span></p>
+    <div id="qr"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const form = document.getElementById("offlineForm");
+    const qrDiv = document.getElementById("qr");
+    const paymentSection = document.getElementById("payment-section");
+    const selectedPlan = document.getElementById("selectedPlan");
+    const priceEl = document.getElementById("price");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const phone = document.getElementById("phone").value;
+      const date = document.getElementById("date").value;
+      const timing = document.getElementById("timing").value;
+      const location = document.getElementById("location").value;
+      const planData = document.getElementById("plan").value;
+
+      if (!planData) {
+        alert("Please select a plan");
+        return;
+      }
+
+      const [plan, amount] = planData.split(":");
+
+      // Show selected plan and price
+      selectedPlan.textContent = plan;
+      priceEl.textContent = amount;
+
+      // Generate QR Code with UPI link (replace with your UPI ID)
+      const upiID = "9354543672@pthdfc"; 
+      const upiLink = `upi://pay?pa=${upiID}&pn=CoreFit&am=${amount}&cu=INR`;
+
+      qrDiv.innerHTML = ""; 
+      QRCode.toCanvas(document.createElement("canvas"), upiLink, (err, canvas) => {
+        if (!err) qrDiv.appendChild(canvas);
+      });
+
+      paymentSection.style.display = "block";
+      // Save offline registration details in backend
+await fetch("http://localhost:5000/api/offline-register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    name,
+    email,
+    phone,
+    date,
+    timing,
+    location,
+    plan,
+    amount
+  })
+}).then(res => res.json())
+  .then(data => alert(data.message));
+    });
+  </script>
+</body>
+</html>

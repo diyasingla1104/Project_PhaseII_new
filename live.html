@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Class Registration - CoreFit</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #facc15;
+    }
+    form {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+    }
+    input, select, button {
+      width: 90%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+    }
+    button {
+      background: #facc15;
+      color: black;
+      cursor: pointer;
+    }
+    #payment-section {
+      margin-top: 20px;
+      display: none;
+    }
+    #qr {
+      margin-top: 15px;
+    }
+    .amount {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #22c55e;
+    }
+  </style>
+</head>
+<body>
+<a href="home.html" class="return-link">⬅ Back to Homepage</a>
+  <h1>🔥 Live Class Registration</h1>
+  <form id="liveForm">
+    <input type="text" id="name" placeholder="Full Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="tel" id="phone" placeholder="Phone Number" required>
+    
+    <label for="plan">Select Plan:</label>
+    <select id="plan" required>
+      <option value="">--Choose a Plan--</option>
+      <option value="Basic:499">Basic - ₹499</option>
+      <option value="Standard:999">Standard - ₹999</option>
+      <option value="Premium:1499">Premium - ₹1499</option>
+    </select>
+    <input type="text" id="timing" name="timing" placeholder="Preferred Timing (e.g., 7AM - 8AM)" required>
+
+    <button type="submit">Register & Pay</button>
+  </form>
+
+  <div id="payment-section">
+    <p>You have selected the <span id="selectedPlan"></span> plan.</p>
+    <p class="amount">Please pay: ₹<span id="price"></span></p>
+    <div id="qr"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    const form = document.getElementById("liveForm");
+    const qrDiv = document.getElementById("qr");
+    const paymentSection = document.getElementById("payment-section");
+    const selectedPlan = document.getElementById("selectedPlan");
+    const priceEl = document.getElementById("price");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const phone = document.getElementById("phone").value;
+      const planData = document.getElementById("plan").value;
+
+      if (!planData) {
+        alert("Please select a plan");
+        return;
+      }
+
+      const [plan, amount] = planData.split(":");
+
+      // Show selected plan and price
+      selectedPlan.textContent = plan;
+      priceEl.textContent = amount;
+
+      // Generate QR Code with UPI link (replace with your UPI ID)
+      const upiID = "9354543672@pthdfc"; 
+      const upiLink = `upi://pay?pa=${upiID}&pn=CoreFit&am=${amount}&cu=INR`;
+
+      qrDiv.innerHTML = ""; 
+      QRCode.toCanvas(document.createElement("canvas"), upiLink, (err, canvas) => {
+        if (!err) qrDiv.appendChild(canvas);
+      });
+
+      paymentSection.style.display = "block";
+
+      // Save registration details in backend
+      // Save registration details in backend
+await fetch("http://localhost:5000/api/live-register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    name,
+    email,
+    phone,
+    plan,
+    amount,
+    timing
+  })
+}).then(res => res.json())
+  .then(data => alert(data.message));
+    });
+  </script>
+</body>
+</html>
