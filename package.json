@@ -2,10 +2,10 @@
   "name": "corefit-registration",
   "version": "1.0.0",
   "description": "CoreFit Registration System",
-  "main": "server.js",
+  "type": "module",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node api/index.js"
   },
   "dependencies": {
     "axios": "^1.11.0",
@@ -13,14 +13,8 @@
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
-    "xlsx": "^0.18.5"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.22"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "pg": "^8.11.5",
+    "dotenv": "^16.3.1"
+  }
 }
